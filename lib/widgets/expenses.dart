@@ -50,9 +50,34 @@ class _ExpensesState extends State<Expenses> {
   }
 
   void _removeExpense(Expense expense) {
+    final removeIndex = _registeredExpenses.indexOf(expense);
     setState(() {
       _registeredExpenses.remove(expense);
     });
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () {
+              setState(() {
+                _registeredExpenses.insert(removeIndex, expense);
+              });
+            }),
+        content: const Text('Delete Success'),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  Widget _showDefault() {
+    if (_registeredExpenses.isNotEmpty) {
+      return ExpensesList(
+          expenses: _registeredExpenses, onRemoveExpense: _removeExpense);
+    }
+    return const Center(
+      child: Text('Please add a record'),
+    );
   }
 
   @override
@@ -64,8 +89,7 @@ class _ExpensesState extends State<Expenses> {
           icon: const Icon(Icons.add),
         )
       ]),
-      body: ExpensesList(
-          expenses: _registeredExpenses, onRemoveExpense: _removeExpense),
+      body: _showDefault(),
     );
   }
 }
